@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>AgroSmart</title>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+</head>
+
+<body>
+	<input type="text" id="pathinput" style="width: 300px;">
+	<input type="button" value="submit" onclick="submitted()">
+</body>
+<script>
+	async function submitted() {
+		var val = document.getElementById('pathinput').value;
+		console.log(val);
+		const data = {val}
+		const options = {
+			method: 'POST',
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(data)
+		}
+		const responce = await fetch("/postpath", options);
+		json = await responce.json();
+		document.getElementById('pathinput').value = '';
+	}
+</script>
+
+</html>
