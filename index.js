@@ -8,15 +8,24 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`listening at ${port}`));
 app.use(express.static('public/'));
 app.use(express.json());
-app.post('/postpath', (request, response) => {
+app.post('/postpath', (request, response, next) => {
 	console.log(request.body.val);
-	response.json({
-        status: "success"
-    });
-    response.end();	
-	fs.readFile(request.body.val, 'utf8', function(err, data){
-		if (err) throw err;
-		obj = JSON.parse(data);
-		console.log(obj);
-	});
+	// response.json({
+    //     status: "success"
+    // });
+    // response.end();	
+	// fs.readFile(request.body.val, 'utf8', function(err, data){
+	// 	if (err) throw err;
+	// 	obj = JSON.parse(data);
+	// 	console.log(obj);
+	// });
+	
+	var fileName = request.body.val
+	response.sendFile(fileName,function (err) {
+		if (err) {
+			next(err)
+		} else {
+			console.log('Sent:', fileName)
+		}
+	})
 })

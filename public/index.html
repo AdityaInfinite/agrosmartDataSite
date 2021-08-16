@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>AgroSmart</title>
+	<title>Agrosmart</title>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 </head>
-
-<body>
+<body style="background-color: #232627!important">
 	<input type="text" id="pathinput" style="width: 300px;">
 	<input type="button" value="submit" onclick="submitted()">
+	<br><br>
+	<canvas id="myChart" width="400" height="100"></canvas>
 </body>
 <script>
-	async function submitted() {
+	function submitted(){
+		document.getElementById("myChart").style.backgroundColor = "white"
+		submit()
+	}
+	async function submit() {
 		var val = document.getElementById('pathinput').value;
 		console.log(val);
-		const data = {val}
+		const data = { val }
 		const options = {
 			method: 'POST',
 			headers: {
@@ -25,10 +29,51 @@
 			},
 			body: JSON.stringify(data)
 		}
-		const responce = await fetch("/postpath", options);
-		json = await responce.json();
-		document.getElementById('pathinput').value = '';
+		const response = await fetch("/postpath", options);
+		// document.getElementById('pathinput').value = '';
+		const csvfile = await response.text();
+		// console.log(csvfile);
+		datahandle(csvfile);
+	}
+	function datahandle(data) {
+		// console.log(data);
+		const years = [];
+		const val0 = [];
+		const val1 = [];
+		const rows = data.split('\n').slice(1);
+		rows.forEach(row => {
+			const cols = row.split(',');
+			years.push(cols[0]);
+			val0.push(parseFloat(cols[1]));
+			val1.push(parseFloat(cols[2]));
+		});
+
+		const ctx = document.getElementById('myChart').getContext('2d');
+		const myChart = new Chart(ctx, {
+			type: 'line',
+			data: {
+				labels: years,
+				datasets: [
+					{
+						label: 'soil moisture',
+						data: val0,
+						fill: false,
+						borderColor: 'rgba(255, 99, 132, 1)',
+						backgroundColor: 'rgba(255, 99, 132, 0.5)',
+						borderWidth: 1
+					},
+					{
+						label: 'soil moisture',
+						data: val1,
+						fill: false,
+						borderColor: 'rgba(102, 152, 232, 1)',
+						backgroundColor: 'rgba(102, 152, 232, 0.5)',
+						borderWidth: 1
+					}
+				]
+			},
+			options: {}
+		});
 	}
 </script>
-
 </html>
