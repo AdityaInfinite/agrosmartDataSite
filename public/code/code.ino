@@ -18,7 +18,8 @@ DS3231 rtc(SDA, SCL);
 int val[numOfSensors];
 Time t;
 
-const int ledPin = 2;
+#define ledPin 2
+#define pumpPin 7
 int ledState = LOW;
 unsigned long previousMillis = 0;
 bool SDInit = true;
@@ -29,11 +30,8 @@ void setup() {
   delay(2000);
   Serial.begin(9600);
   rtc.begin();
-  pinMode(3, OUTPUT);
-  pinMode(2, OUTPUT);
-  digitalWrite(3, HIGH);
-  digitalWrite(2, LOW);
-  Serial.println("Setup finished");
+  pinMode(pumpPin, OUTPUT);
+  digitalWrite(pumpPin, HIGH);
   Serial.print("Initializing SD card...");
   if (!SD.begin(4)) {
     Serial.println("initialization failed!");
@@ -43,7 +41,7 @@ void setup() {
   }
   File dataFile = SD.open("datalog.csv", FILE_WRITE);
   csvString += rtc.getTimeStr() + String(" ") + rtc.getDateStr() + String(",");
-  if (dataFile) {
+  if (dataFile && SDInit) {
     for (int pin = A0, count = 0 ; count < numOfSensors ; count++) {
       csvString += map(analogRead(pin), UpMapCon, LowMapCon, 0, 100);
       if (count != numOfSensors - 1) {
@@ -57,6 +55,7 @@ void setup() {
   } else {
     Serial.println("error opening datalog.txt");
   }
+  Serial.println("Setup finished");
 }
 
 void loop() {
@@ -75,7 +74,6 @@ void loop() {
     sum = sum + val[count];
   }
   avg = sum / numOfSensors;
-
   Serial.println(csvString);
   if (/*t.min == 00 && */t.sec == 00 && SDInit) {
     Serial.println("Logging");
@@ -102,13 +100,13 @@ void loop() {
 }
 void water(int avg) {
   int duration = map(avg, 0 , 100 , 10 , 1 );
-  digitalWrite(3, LOW);
+  digitalWrite(pumpPin, LOW);
   if (duration < 0) {
     duration = 0;
   }
   Serial.print("starting watering, duration = ");
   Serial.println(duration);
   delay(duration * 1000);
-  digitalWrite(3, HIGH);
+  digitalWrite(pumpPin, HIGH);
   Serial.println(".....done watering");
 }
